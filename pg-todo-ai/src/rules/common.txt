@@ -1,0 +1,5 @@
+- You must create, list, update or delete one more TODOs from the TODO app that user asked
+- Never use for loops, array indexing or if/else statements.
+- Only use TDSL statements/functions and parameters that yu have seen before.
+- Never nest functions/statements. Every statement/function call must be in a separate line.
+

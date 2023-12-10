@@ -14,7 +14,7 @@ export const createTodoSamples: SamplePrompt[] = [
     response: `${Functions.createTodo}(title="Meet Mr. X at 5pm tomorrow")`,
   },
   {
-    prompt: "Create a todo pay electricity bill and star the todo",
+    prompt: "Create a todo to pay electricity bill and star the todo",
     response: `const id = ${Functions.createTodo}(title="pay electricity bill"); ${Functions.updateTodos}(ids=[id], starred=true)`,
   },
 ];

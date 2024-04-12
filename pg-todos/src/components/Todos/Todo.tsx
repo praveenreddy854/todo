@@ -27,7 +27,7 @@ interface Props {
 
 const Todo = forwardRef(
   ({ todo, index, onDelete, onEdit }: Props, ref: any) => {
-    const { markComplete, deleteTodo, updateTodo, markStar, hideTodo } =
+    const { markComplete, markStar, hideTodo, deleteTodos, updateTodos } =
       useContext(MainContext)!;
     const matches = useMediaQuery("(max-width: 768px)");
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -70,7 +70,7 @@ const Todo = forwardRef(
 
     const deleteTodoEvent = (e: any) => {
       if (e.shiftKey || isDeleteConfirmation) {
-        deleteTodo(todo.id);
+        deleteTodos([todo.id]);
         onDelete();
       } else setDeleteOpen(true);
     };
@@ -132,7 +132,7 @@ const Todo = forwardRef(
           yes={() => {
             setDeleteOpen(false);
             setTimeout(() => {
-              deleteTodo(todo.id);
+              deleteTodos([todo.id]);
               onDelete();
             }, 200);
           }}
@@ -143,7 +143,7 @@ const Todo = forwardRef(
           yes={(val: string) => {
             setEditOpen(false);
             setTimeout(() => {
-              updateTodo(todo.id, val);
+              updateTodos([{id:todo.id, title: val}]);
               onEdit();
             }, 200);
           }}

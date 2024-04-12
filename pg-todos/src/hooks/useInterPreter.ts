@@ -1,31 +1,194 @@
 import { ChatChoice } from "@azure/openai";
-import { Functions } from "../types/types";
+import { DeleteToDosArgs, Functions } from "../types/types";
 import { useAddInterPreter } from "./useAddInterPreter";
-import {
-  useDeleteInterPreter,
-  useDeletesInterPreter,
-} from "./useDeleteInterPreter";
-import {
-  useUpdatesInterPreter,
-  useUpdateInterPreter,
-} from "./useUpdateInterPreter";
+import { useDeletesInterPreter } from "./useDeleteInterPreter";
+import { useUpdatesInterPreter } from "./useUpdateInterPreter";
+import { Project } from "ts-morph";
+import { createFunctions } from "../functions/createFunctions";
 
 export const useInterPreter = () => {
   // Execute create ToDo interpreter only if the LLM response returned create_todo fn
   const addTodo = useAddInterPreter();
-  const deleteTodo = useDeleteInterPreter();
   const deleteTodos = useDeletesInterPreter();
   const updateTodos = useUpdatesInterPreter();
-  const updateTodo = useUpdateInterPreter();
   return function (response?: ChatChoice) {
-    if (response?.finishReason && response?.finishReason !== "function_call") {
-      throw Error("Not an open ai function call");
+    if (response?.finishReason !== "stop") {
+      throw Error("Function call is not a stop.");
     }
-    const fn = response?.message?.functionCall;
-    addTodo(fn?.arguments, fn?.name === Functions.createTodo);
-    deleteTodo(fn?.arguments, fn?.name === Functions.deleteTodo);
-    deleteTodos(fn?.arguments, fn?.name === Functions.deleteTodos);
-    updateTodos(fn?.arguments, fn?.name === Functions.updateTodos);
-    updateTodo(fn?.arguments, fn?.name === Functions.updateTodo);
+
+    let resultMap: Record<string, unknown> = {};
+    extractFnsAndVariables(response).forEach((fn) => {
+      switch (fn?.name) {
+        case Functions.createTodos:
+          Object.keys(fn.arguments).forEach((key) => {
+            if (key === "title") {
+              const id = addTodo({ title: fn.arguments[key] as string });
+              if (fn.result) {
+                resultMap[fn.result as string] = id;
+              }
+              return;
+            }
+          });
+          break;
+        case Functions.deleteTodos:
+          const deleteTodoArgs: DeleteToDosArgs = {
+            ids: fn?.arguments["ids"] as number[],
+          };
+          deleteTodos(deleteTodoArgs);
+          break;
+        case Functions.updateTodos:
+          const ids = extractIdsFromArgs(fn, resultMap);
+          const updateTodoArgsStr = JSON.stringify(fn?.arguments);
+          const updateTodoArgs = JSON.parse(updateTodoArgsStr);
+
+          const updatesTodoArgsWithId = ids.map((id) => {
+            if (isNaN(id)) {
+              console.log("id is not a number");
+              return;
+            }
+            const { ids, ...rest } = updateTodoArgs; // remove ids property
+            return { ...rest, id: id }; // add id property
+          });
+          updateTodos(updatesTodoArgsWithId);
+          break;
+        default:
+          throw Error("Function not found");
+          break;
+      }
+    });
   };
 };
+
+export interface FunctionArgsResultMap {
+  name: Functions;
+  arguments: Record<string, unknown>;
+  result: unknown;
+}
+
+const extractFnsAndVariables = (response: ChatChoice) => {
+  const fnArgsResults: FunctionArgsResultMap[] = [];
+  const project = new Project({ useInMemoryFileSystem: true });
+  const responseSplits = response?.message?.content?.split(";");
+
+  responseSplits?.forEach((line) => {
+    const sourceFileName = `${Math.random().toString(36).substring(7)}.ts`;
+    const sourceFile = project.createSourceFile(sourceFileName, line);
+    try {
+      let fnName: string = "";
+      let fnArgs: Record<string, unknown> = {};
+      let result: unknown;
+
+      sourceFile.getDescendants().forEach((node) => {
+        if (node.getKindName() === "ExpressionStatement") {
+          node.getDescendants().forEach((expressionChild) => {
+            if (expressionChild.getKindName() === "CallExpression") {
+              expressionChild
+                .getDescendants()
+                .forEach((callExpressionChild) => {
+                  if (
+                    callExpressionChild.getKindName() === "Identifier" &&
+                    !fnName
+                  ) {
+                    fnName = callExpressionChild.getText();
+                  } else if (
+                    callExpressionChild.getKindName() === "BinaryExpression"
+                  ) {
+                    const splits = callExpressionChild.getText().split("=");
+                    fnArgs[splits[0]] = splits[1];
+                  }
+                });
+            }
+          });
+        } else if (node.getKindName() === "VariableStatement") {
+          node.getDescendants().forEach((variableStatementChild) => {
+            if (
+              variableStatementChild.getKindName() === "VariableDeclarationList"
+            ) {
+              variableStatementChild
+                .getDescendants()
+                .forEach((variableDeclarationListChild) => {
+                  if (
+                    variableDeclarationListChild.getKindName() ===
+                    "VariableDeclaration"
+                  ) {
+                    variableDeclarationListChild
+                      .getDescendants()
+                      .forEach((variableDeclarationChild) => {
+                        if (
+                          variableDeclarationChild.getKindName() ===
+                            "Identifier" &&
+                          !result
+                        ) {
+                          result = variableDeclarationChild.getText();
+                        } else if (
+                          variableDeclarationChild.getKindName() ===
+                          "CallExpression"
+                        ) {
+                          variableDeclarationChild
+                            .getDescendants()
+                            .forEach((callExpressionChild) => {
+                              if (
+                                callExpressionChild.getKindName() ===
+                                  "Identifier" &&
+                                !fnName
+                              ) {
+                                fnName = callExpressionChild.getText();
+                              } else if (
+                                callExpressionChild.getKindName() ===
+                                "BinaryExpression"
+                              ) {
+                                const splits = callExpressionChild
+                                  .getText()
+                                  .split("=");
+                                fnArgs[splits[0]] = splits[1];
+                              }
+                            });
+                        }
+                      });
+                  }
+                });
+            }
+          });
+        }
+      });
+
+      if (!fnName) {
+        throw Error("Function name is not found in the response");
+      }
+      if (Object.keys(fnArgs).length === 0) {
+        throw Error("Function arguments are not found in the response");
+      }
+      fnArgsResults.push({
+        name: fnName as Functions,
+        arguments: fnArgs,
+        result: result,
+      });
+    } finally {
+      // Delete the source file once done
+      project.removeSourceFile(sourceFile);
+    }
+  });
+  console.log("fnArgsResults", fnArgsResults);
+  return fnArgsResults;
+};
+function extractIdsFromArgs(
+  fn: FunctionArgsResultMap,
+  resultMap: Record<string, unknown>
+) {
+  const ids: number[] = [];
+  Object.keys(fn.arguments).forEach((key) => {
+    if (key === "ids") {
+      const idsStr = (fn.arguments[key] as string)
+        .replace("<<", "")
+        .replace(">>", "")
+        .replace("[", "")
+        .replace("]", "");
+
+      idsStr.split(",").forEach((id) => {
+        ids.push(resultMap[id.trim()] as number);
+      });
+      return;
+    }
+  });
+  return ids;
+}

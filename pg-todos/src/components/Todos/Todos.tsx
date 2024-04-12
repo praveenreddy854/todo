@@ -1,3 +1,4 @@
+import React from "react";
 import { useContext, useState } from "react";
 import { MainContext } from "../../context/MainContext";
 import { Droppable, DragDropContext, DropResult } from "react-beautiful-dnd";

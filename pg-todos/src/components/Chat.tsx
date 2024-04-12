@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import { Grid, Paper } from "@material-ui/core";
+import { Box, Grid, LinearProgress, Paper } from "@material-ui/core";
 import { MessageLeft, MessageRight, Message } from "./Message";
 import { ChatInput } from "./ChatInput";
 import { useCallLlmFn } from "../hooks/useLlm";
 import { useInterPreter } from "../hooks/useInterPreter";
 import { Functions } from "../types/types";
+import { CompletionsFinishReason } from "@azure/openai";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -49,7 +50,7 @@ export interface ChatProps {
 export function Chat() {
   const classes = useStyles();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const { error, isLoading, mutateAsync } = useCallLlmFn();
+  const { error, isLoading, mutate } = useCallLlmFn();
 
   const [currentChatMessage, setCurrentChatMessage] = useState<Message>();
   const [value, setValue] = useState("");
@@ -70,21 +71,11 @@ export function Chat() {
     setCurrentChatMessage(message);
   };
 
-  const getSuccessMessage = (fnName?: string) => {
-    if (!fnName) {
-      throw new Error("Function name is undefined");
-    }
-    if (fnName === Functions.createTodo) {
-      return "Added ToDo successfully";
-    }
-    if (fnName === Functions.deleteTodo) {
-      return "Deleted ToDo successfully";
-    }
-    if (fnName === Functions.deleteTodos) {
-      return "Deleted ToDos successfully";
-    }
-    if (fnName === Functions.updateTodo) {
-      return "Updated ToDo successfully";
+  const getSuccessMessage = (
+    completionReason: CompletionsFinishReason | null
+  ) => {
+    if (completionReason !== "stop") {
+      throw new Error("Operation failed. Please try again.");
     }
     return "Successfully completed operation";
   };
@@ -92,44 +83,62 @@ export function Chat() {
   const handleChatMessageSubmit = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    const response = await mutateAsync(value);
-    callInterPrtr(response);
-
     event.preventDefault();
     let systemMessage;
-    if (isLoading) {
-      systemMessage = {
-        userMessage: false,
-        message: "Processing...",
-        timestamp: new Date(),
-        photoURL: "",
-        displayName: "System",
-      };
-    } else if (error) {
-      systemMessage = {
-        userMessage: false,
-        message: error.message,
-        timestamp: new Date(),
-        photoURL: "",
-        displayName: "System",
-      };
-    } else {
-      systemMessage = {
-        userMessage: false,
-        message: getSuccessMessage(response?.message?.functionCall?.name),
-        timestamp: new Date(),
-        photoURL: "",
-        displayName: "System",
-      };
-    }
+    systemMessage = {
+      userMessage: false,
+      message: "Processing...",
+      timestamp: new Date(),
+      photoURL: "",
+      displayName: "System",
+    };
+
     setChatMessages(
       !!currentChatMessage
         ? [...chatMessages, currentChatMessage, systemMessage]
         : chatMessages
     );
+    setValue("");
+
+    mutate(value, {
+      onSuccess: (data) => {
+        try {
+          callInterPrtr(data);
+          if (error) {
+            systemMessage = {
+              userMessage: false,
+              message: error.message,
+              timestamp: new Date(),
+              photoURL: "",
+              displayName: "System",
+            };
+          } else {
+            systemMessage = {
+              userMessage: false,
+              message: getSuccessMessage(data?.finishReason),
+              timestamp: new Date(),
+              photoURL: "",
+              displayName: "System",
+            };
+          }
+        } catch (error) {
+          systemMessage = {
+            userMessage: false,
+            message: "Something went wrong. Please try again.",
+            timestamp: new Date(),
+            photoURL: "",
+            displayName: "System",
+          };
+        }
+        setChatMessages(
+          !!currentChatMessage
+            ? [...chatMessages, currentChatMessage, systemMessage]
+            : chatMessages
+        );
+      },
+    });
 
     setCurrentChatMessage(undefined);
-    setValue("");
   };
 
   return (
@@ -148,6 +157,12 @@ export function Chat() {
             return <MessageRight {...message} />;
           })}
         </Paper>
+
+        {isLoading && (
+          <Box sx={{ width: "100%", padding: 10 }}>
+            <LinearProgress />
+          </Box>
+        )}
 
         <ChatInput
           onChange={handleChatMessageChange}

@@ -1,3 +1,4 @@
+import React from "react";
 import { Container, Switch, useMediaQuery } from "@material-ui/core";
 import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";

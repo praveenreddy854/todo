@@ -1,23 +1,39 @@
-import { ChatMessage } from "@azure/openai";
+import { ChatCompletions, ChatMessage } from "@azure/openai";
 
 export interface LlmInput {
-  userQueryMatcher: string;
-  prompt: string;
   functions: FunctionSchema[];
 }
 
+export interface ChatCompletionsWithPrompt {
+  completions: ChatCompletions;
+  prompt: string;
+}
+
 export enum Functions {
-  createTodo = "create_todo",
-  deleteTodo = "delete_todo",
-  deleteTodos = "delete_todos",
-  listTodos = "list_todos",
-  updateTodo = "update_todo",
-  updateTodos = "update_todos",
+  createTodo = "create",
+  deleteTodo = "delete",
+  listTodos = "list",
+  updateTodo = "update",
+}
+
+export enum Actions {
+  create = "create",
+  delete = "delete",
+  update = "update",
+  list = "list",
+  createUpdate = "create-update",
+}
+
+export const Roles = {
+  User: "user",
+  System : "system",
+  Assistant: "assistant"
 }
 
 export interface FunctionSchema {
   functionName: Functions;
-  arguments: Record<string, ArgumentSchema>;
+  functionDescription: string;
+  arguments: ArgumentSchema[];
 }
 
 export interface ArgumentSchema {

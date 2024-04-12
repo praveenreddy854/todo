@@ -29,6 +29,7 @@ app.post("/api/fn", async (req, res) => {
     const response = await fnCallOpenAI(req.body["message"]);
     res.json(getFilteredResponse(response));
   } catch (err) {
+    console.error(err);
     res.status(500).send(err);
   }
 });

@@ -40,12 +40,14 @@ export const ChatInput = (props: ChatInputProps) => {
           className={classes.wrapText}
           onChange={props.onChange}
           value={props.value}
+          disabled={!props.enabled}
         />
         <Button
           color="primary"
           className={classes.button}
           onClick={props.onClick}
           type="button"
+          disabled={!props.enabled}
         >
           <SendIcon />
         </Button>

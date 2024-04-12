@@ -4,7 +4,7 @@ import { AddToDoArgs } from "../types/types";
 
 export const useAddInterPreter = () => {
   const { addTodo } = useContext(MainContext)!;
-  return function (args?: string, enabled: boolean = true) {
+  return function (args?: AddToDoArgs, enabled: boolean = true) {
     if (!enabled) {
       return;
     }
@@ -12,6 +12,6 @@ export const useAddInterPreter = () => {
       throw Error("Args can't be empty or null for ToDo creation");
     }
 
-    addTodo(JSON.parse(args) as AddToDoArgs);
+    return addTodo(args);
   };
 };

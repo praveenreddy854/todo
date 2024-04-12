@@ -1,6 +1,9 @@
-import { createTodo } from "./create-todo";
-import { deleteTodo } from "./delete-todo";
-import { deleteTodos } from "./delete-todos";
-import { updateTodos } from "./update-todos";
+import { createTodo } from "./create";
+import { deleteTodo } from "./delete";
+import { updateTodo } from "./update";
 
-export const FnSchemas = [createTodo, deleteTodo, deleteTodos, updateTodos];
+export const FnSchemas = {
+  create: createTodo,
+  delete: deleteTodo,
+  update: updateTodo,
+};

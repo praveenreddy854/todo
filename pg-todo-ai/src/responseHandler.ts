@@ -1,22 +1,24 @@
 import {
-  ChatChoice,
-  ChatCompletions,
   ContentFilterResult,
 } from "@azure/openai";
+import { ChatCompletionsWithPrompt } from "./types/types";
 
-export const getFilteredResponse = (response: ChatCompletions): ChatChoice => {
-  if (response.choices[0].finishReason !== "function_call") {
-    console.error(JSON.stringify(response, null, 2));
-    throw new Error("The response is not a function call.");
+export const getFilteredResponse = (
+  response: ChatCompletionsWithPrompt
+): ChatCompletionsWithPrompt => {
+  const choice = response.completions.choices[0];
+  if (choice.finishReason !== "stop") {
+    throw new Error("The response is not a stop.");
   }
-  response.promptFilterResults?.forEach((result) => {
+
+  response.completions.promptFilterResults?.forEach((result) => {
     if (result.contentFilterResults) {
       for (const [key, value] of Object.entries(result.contentFilterResults)) {
         throwIfNotSafe(key, value);
       }
     }
   });
-  return response.choices[0];
+  return response;
 };
 
 const throwIfNotSafe = (

@@ -8,7 +8,7 @@ export const useCallLlmFn = () => {
     mutationFn: async (query: string) => {
       const data = { message: query };
       const response = await axios.post(todoServiceFnUrl, data);
-      return response.data;
+      return response.data.completions.choices[0];
     },
     onSuccess: (data) => {
       console.log(data);

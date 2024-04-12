@@ -6,7 +6,7 @@ import fs from "fs";
 import { Samples } from "../samples";
 
 export const createPrompts = async () => {
-  FnSchemas.forEach((fnSchema) => {
+  Object.entries(FnSchemas).forEach(([fnSchemaKey, fnSchemaVal]) => {
     const parameters = {
       type: "object",
       properties: {},
@@ -15,16 +15,12 @@ export const createPrompts = async () => {
 
     let introPrompt = "system:" + intro;
 
-    const samples = fnSchema.functions.map(
+    const samples = fnSchemaVal.functions.map(
       (fn) => "\n" + JSON.stringify(Samples[fn.functionName])
     );
     introPrompt += samples.join("\n");
 
     const messages: ChatMessage[] = [
-      {
-        role: "system",
-        content: fnSchema.prompt,
-      },
       {
         role: "system",
         content: introPrompt,
@@ -33,7 +29,7 @@ export const createPrompts = async () => {
 
     const rawInput: LlmRawInput = {
       messages,
-      functions: fnSchema.functions.map((fn) => ({
+      functions: fnSchemaVal.functions.map((fn) => ({
         name: fn.functionName,
         description: "",
         // open ai parameters
@@ -62,7 +58,7 @@ export const createPrompts = async () => {
         },
       })),
     };
-    const fileName = fnSchema.functions[0].functionName;
+    const fileName = fnSchemaKey;
     const dir = "./dist/samples/prompts";
     // create dir if not exists
     if (!fs.existsSync(dir)) {
@@ -80,5 +76,3 @@ export const createPrompts = async () => {
     );
   });
 };
-
-createPrompts();

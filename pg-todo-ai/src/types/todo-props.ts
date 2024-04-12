@@ -22,6 +22,13 @@ export const idsProp: ArgumentSchema = {
   required: true,
 };
 
+export const starProps: ArgumentSchema = {
+  type: "boolean",
+  description: "Whether the todo is starred",
+  name: "starred",
+  required: false,
+};
+
 export const hiddenProp: ArgumentSchema = {
   type: "boolean",
   description: "Whether the todo is hidden",

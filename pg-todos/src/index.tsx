@@ -1,3 +1,4 @@
+import React from "react";
 import { render } from "react-dom";
 import { MainProvider } from "./context/MainContext";
 import { ThemeProvider } from "./context/ThemeContext";

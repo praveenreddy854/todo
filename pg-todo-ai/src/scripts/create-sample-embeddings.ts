@@ -19,10 +19,7 @@ export const createSamplesEmbeddings = async () => {
         const samples = Samples[functionName];
         samples.forEach(async (sample) => {
             console.log(`Creating embedding for: ${sample.prompt}`);
-            const embedding = await getEmbeddingsAsync(sample.response).catch((err) => {
-                console.error(`Error creating embedding for: ${sample.prompt}`);
-                console.error(err);
-            });
+            const embedding = await getEmbeddingsAsync(sample.response);
             console.log(`Embedding created for: ${sample.prompt}`);
             const row = `"${escapeDoubleQuotesCsv(sample.prompt)}","${escapeDoubleQuotesCsv(sample.response)}","${embedding}"\n`;
             fs.appendFileSync(filePath, row);

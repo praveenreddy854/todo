@@ -1,4 +1,9 @@
-import { idsProp, hiddenProp, starProps } from "../types/todo-props";
+import {
+  idsProp,
+  hiddenProp,
+  starProps,
+  completedProp,
+} from "../types/todo-props";
 import { Functions, LlmInput } from "../types/types";
 
 export const updateTodo: LlmInput = {
@@ -6,7 +11,7 @@ export const updateTodo: LlmInput = {
     {
       functionName: Functions.updateTodo,
       functionDescription: "Update the todos with the given IDs",
-      arguments: [idsProp, hiddenProp, starProps],
+      arguments: [idsProp, hiddenProp, starProps, completedProp],
     },
   ],
 };

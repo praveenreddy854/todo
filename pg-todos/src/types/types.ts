@@ -1,7 +1,7 @@
 // Copied from service, can be separated into its own package.
 export enum Functions {
   createTodos = "create",
-  deleteTodos = "delete",
+  deleteTodos = "deletes", // delete is a reserved keyword
   listTodos = "list",
   updateTodos = "update",
 }

@@ -22,7 +22,7 @@ export const fnCallOpenAI = async (
   return resultWithPrompt;
 };
 
-export const getOpenAIClient = async () => {
+export const getOpenAIClient = () => {
   dotenv.config();
   const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
   const key = process.env.OPENAI_API_KEY;

@@ -32,28 +32,26 @@ export const useInterPreter = () => {
           break;
         case Functions.deleteTodos:
           const deleteTodoArgs: DeleteToDosArgs = {
-            ids: fn?.arguments["ids"] as number[],
+            ids: extractIdsFromArgs(fn, resultMap),
           };
           deleteTodos(deleteTodoArgs);
           break;
         case Functions.updateTodos:
+          const updateTodoArgs = fn?.arguments;
           const ids = extractIdsFromArgs(fn, resultMap);
-          const updateTodoArgsStr = JSON.stringify(fn?.arguments);
-          const updateTodoArgs = JSON.parse(updateTodoArgsStr);
 
           const updatesTodoArgsWithId = ids.map((id) => {
             if (isNaN(id)) {
-              console.log("id is not a number");
-              return;
+              throw new Error("Id is not a number");
             }
             const { ids, ...rest } = updateTodoArgs; // remove ids property
             return { ...rest, id: id }; // add id property
           });
+
           updateTodos(updatesTodoArgsWithId);
           break;
         default:
           throw Error("Function not found");
-          break;
       }
     });
   };
@@ -185,7 +183,9 @@ function extractIdsFromArgs(
         .replace("]", "");
 
       idsStr.split(",").forEach((id) => {
-        ids.push(resultMap[id.trim()] as number);
+        ids.push(
+          parseInt(resultMap[id.trim()] as string) || parseInt(id.trim())
+        );
       });
       return;
     }

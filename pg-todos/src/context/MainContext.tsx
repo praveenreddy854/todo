@@ -24,7 +24,7 @@ export const MainContext = createContext<MainContextInterface | null>(null);
 
 export const MainProvider = ({ children }: Props) => {
   let todosFromLocalStore = JSON.parse(
-    localStorage.getItem("todos") || ""
+    localStorage.getItem("todos") || "[]"
   ) as TodoType[];
 
   const [todos, setTodos] = useState(todosFromLocalStore);

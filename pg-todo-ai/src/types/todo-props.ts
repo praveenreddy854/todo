@@ -35,3 +35,10 @@ export const hiddenProp: ArgumentSchema = {
   name: "hidden",
   required: false,
 };
+
+export const completedProp: ArgumentSchema = {
+  type: "boolean",
+  description: "Whether the todo is completed",
+  name: "completed",
+  required: false,
+};

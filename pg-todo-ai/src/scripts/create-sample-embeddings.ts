@@ -1,7 +1,7 @@
 import { escapeDoubleQuotesCsv, getTsConfig } from "./utils";
-import fs from "fs/promises";
 import { Samples } from "../samples";
-import { getEmbeddings } from "../embeddings";
+import { getEmbeddingsAsync } from "../embeddings";
+import fs from "fs";
 
 export const SamplesPath = "/samples/";
 export const RelativeEmbeddingsPath = `${SamplesPath}embeddings.csv`;
@@ -13,14 +13,19 @@ export const createSamplesEmbeddings = async () => {
     const filePath = `${outDir}${RelativeEmbeddingsPath}`;
     // Create embeddings.csv with header input,embedding
     const header = "prompt,response,embedding\n";
-    await fs.writeFile(filePath, header);
+    fs.writeFileSync(filePath, header);
     // Create each prompt and response as a row in embeddings.csv
-    Object.keys(Samples).forEach((functionName) => {
+    Object.keys(Samples).forEach(async (functionName) => {
         const samples = Samples[functionName];
         samples.forEach(async (sample) => {
-            const embedding = await getEmbeddings(sample.response);
+            console.log(`Creating embedding for: ${sample.prompt}`);
+            const embedding = await getEmbeddingsAsync(sample.response).catch((err) => {
+                console.error(`Error creating embedding for: ${sample.prompt}`);
+                console.error(err);
+            });
+            console.log(`Embedding created for: ${sample.prompt}`);
             const row = `"${escapeDoubleQuotesCsv(sample.prompt)}","${escapeDoubleQuotesCsv(sample.response)}","${embedding}"\n`;
-            await fs.appendFile(filePath, row);
+            fs.appendFileSync(filePath, row);
         });
     });
 };

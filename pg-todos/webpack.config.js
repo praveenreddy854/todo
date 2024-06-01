@@ -16,13 +16,16 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use: ["remove-hashbag-loader"]
-      }
+        use: ["remove-hashbag-loader", "source-map-loader"],
+      },
     ],
   },
   resolveLoader: {
     alias: {
-      "remove-hashbag-loader": path.resolve(__dirname, "loaders/remove-hashbag-loader.js"),
+      "remove-hashbag-loader": path.resolve(
+        __dirname,
+        "loaders/remove-hashbag-loader.js"
+      ),
     },
   },
   resolve: {

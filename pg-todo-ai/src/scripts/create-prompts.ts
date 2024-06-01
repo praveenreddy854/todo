@@ -5,7 +5,7 @@ import { FnSchemas } from "../function-shema";
 import fs from "fs";
 import { Samples } from "../samples";
 
-export const createPrompts = async () => {
+export const createPrompts = () => {
   Object.entries(FnSchemas).forEach(([fnSchemaKey, fnSchemaVal]) => {
     const parameters = {
       type: "object",
@@ -48,9 +48,9 @@ export const createPrompts = async () => {
           })(),
           required: (function () {
             const required: string[] = [];
-            Object.entries(fn.arguments).forEach(([key, value]) => {
-              if (value.required) {
-                required.push(key);
+            fn.arguments.forEach((arg) => {
+              if (arg.required) {
+                required.push(arg.name);
               }
             });
             return required;
@@ -64,15 +64,12 @@ export const createPrompts = async () => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
+
+    console.log("Writing to file: ", fileName);
     // write to file
-    fs.writeFile(
+    fs.writeFileSync(
       `./dist/samples/prompts/${fileName}.json`,
-      JSON.stringify(rawInput),
-      (err) => {
-        if (err) {
-          console.log(err);
-        }
-      }
+      JSON.stringify(rawInput)
     );
   });
 };

@@ -11,7 +11,7 @@ export interface ChatCompletionsWithPrompt {
 
 export enum Functions {
   createTodo = "create",
-  deleteTodo = "delete",
+  deleteTodo = "deletes", // delete is a reserved keyword
   listTodos = "list",
   updateTodo = "update",
 }
@@ -26,9 +26,9 @@ export enum Actions {
 
 export const Roles = {
   User: "user",
-  System : "system",
-  Assistant: "assistant"
-}
+  System: "system",
+  Assistant: "assistant",
+};
 
 export interface FunctionSchema {
   functionName: Functions;

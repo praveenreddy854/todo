@@ -1,9 +1,6 @@
-import React from "react";
-import { createContext, useEffect, useState, ReactNode } from "react";
-import {
-  enable as enableDarkMode,
-  disable as disableDarkMode,
-} from "darkreader";
+import React from 'react';
+import { createContext, useEffect, useState, ReactNode } from 'react';
+import { enable as enableDarkMode, disable as disableDarkMode } from 'darkreader';
 
 interface Props {
   children: ReactNode;
@@ -14,12 +11,10 @@ interface ThemeInterface {
   changeTheme: () => void;
 }
 
-export const ThemeContext = createContext<ThemeInterface | null>(null);
+export const ThemeContext = createContext<ThemeInterface>({} as ThemeInterface);
 
 export const ThemeProvider = ({ children }: Props) => {
-  const [isDark, setIsDark] = useState(
-    JSON.parse(localStorage.getItem("darkTheme")!) || false
-  );
+  const [isDark, setIsDark] = useState(JSON.parse(localStorage.getItem('darkTheme')!) || false);
 
   const changeTheme = () => {
     setIsDark(!isDark);
@@ -32,7 +27,7 @@ export const ThemeProvider = ({ children }: Props) => {
     } else {
       disableDarkMode();
     }
-    localStorage.setItem("darkTheme", String(isDark));
+    localStorage.setItem('darkTheme', String(isDark));
   };
 
   useEffect(() => {
@@ -43,7 +38,7 @@ export const ThemeProvider = ({ children }: Props) => {
         sepia: 10,
       });
     } else disableDarkMode();
-    localStorage.setItem("darkTheme", JSON.stringify(isDark));
+    localStorage.setItem('darkTheme', JSON.stringify(isDark));
   }, [isDark]);
 
   const themeValue: ThemeInterface = {
@@ -51,7 +46,5 @@ export const ThemeProvider = ({ children }: Props) => {
     changeTheme,
   };
 
-  return (
-    <ThemeContext.Provider value={themeValue}>{children}</ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={themeValue}>{children}</ThemeContext.Provider>;
 };

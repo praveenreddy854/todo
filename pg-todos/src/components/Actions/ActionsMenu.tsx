@@ -1,5 +1,5 @@
-import { TodoType } from "../../types";
-import { Typography, IconButton, Menu, MenuItem } from "@material-ui/core";
+import { TodoType } from '../../types';
+import { Typography, IconButton, Menu, MenuItem } from '@material-ui/core';
 import {
   DeleteTwoTone as DeleteIcon,
   EditTwoTone as EditIcon,
@@ -7,32 +7,19 @@ import {
   Star as StarIcon,
   SvgIconComponent,
   VisibilityOff as VisibilityOffIcon,
-} from "@material-ui/icons";
-import useChangeMenuIcon from "../../hooks/useChangeMenuIcon";
-import React, { useState } from "react";
+  Done,
+  DoneOutline,
+} from '@material-ui/icons';
+import useChangeMenuIcon from '../../hooks/useChangeMenuIcon';
+import React, { useState } from 'react';
 
 const ITEM_HEIGHT = 48;
 
 interface Option {
   name: string;
   customColor?: string | undefined;
-  iconColor?:
-    | "error"
-    | "action"
-    | "inherit"
-    | "disabled"
-    | "primary"
-    | "secondary"
-    | undefined;
-  textColor?:
-    | "inherit"
-    | "initial"
-    | "error"
-    | "primary"
-    | "secondary"
-    | "textPrimary"
-    | "textSecondary"
-    | undefined;
+  iconColor?: 'error' | 'action' | 'inherit' | 'disabled' | 'primary' | 'secondary' | undefined;
+  textColor?: 'inherit' | 'initial' | 'error' | 'primary' | 'secondary' | 'textPrimary' | 'textSecondary' | undefined;
   icon: SvgIconComponent;
   method: (e?: React.MouseEvent<HTMLLIElement, MouseEvent>) => void;
 }
@@ -42,34 +29,29 @@ interface Props {
   setEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
   markStar: (id: number) => void;
   hideTodo: (id: number) => void;
+  markComplete: (id: number) => void;
   todo: TodoType;
 }
 
 enum OptionName {
-  STAR = "Star",
-  UNSTAR = "Unstar",
-  EDIT = "Edit",
-  DELETE = "Delete",
-  HIDE = "Hide",
+  STAR = 'Star',
+  UNSTAR = 'Unstar',
+  EDIT = 'Edit',
+  DELETE = 'Delete',
+  HIDE = 'Hide',
+  COMPLETE = 'Complete',
+  UNDOCOMPLETE = 'Undo Complete',
 }
 
-export default function ActionsMenu({
-  deleteTodo,
-  setEditOpen,
-  markStar,
-  hideTodo,
-  todo,
-}: Props) {
-  const [anchorEl, setAnchorEl] = useState<
-    (EventTarget & HTMLButtonElement) | null
-  >(null);
+export default function ActionsMenu({ deleteTodo, setEditOpen, markStar, hideTodo, markComplete, todo }: Props) {
+  const [anchorEl, setAnchorEl] = useState<(EventTarget & HTMLButtonElement) | null>(null);
   const open = Boolean(anchorEl);
   const MenuIcon = useChangeMenuIcon();
 
   const options: Option[] = [
     {
       name: todo.starred ? OptionName.UNSTAR : OptionName.STAR,
-      customColor: todo.starred ? "#CCA43A" : "#000",
+      customColor: todo.starred ? '#CCA43A' : '#000',
       icon: todo.starred ? StarIcon : StarIconOutlined,
       method: () => {
         markStar(todo.id);
@@ -77,9 +59,18 @@ export default function ActionsMenu({
       },
     },
     {
+      name: todo.completed ? OptionName.COMPLETE : OptionName.UNDOCOMPLETE,
+      iconColor: 'primary',
+      textColor: 'primary',
+      icon: todo.completed ? DoneOutline : Done,
+      method: () => {
+        markComplete(todo.id);
+      },
+    },
+    {
       name: OptionName.HIDE,
-      iconColor: "primary",
-      textColor: "primary",
+      iconColor: 'primary',
+      textColor: 'primary',
       icon: VisibilityOffIcon,
       method: () => {
         hideTodo(todo.id);
@@ -88,8 +79,8 @@ export default function ActionsMenu({
     },
     {
       name: OptionName.EDIT,
-      iconColor: "primary",
-      textColor: "primary",
+      iconColor: 'primary',
+      textColor: 'primary',
       icon: EditIcon,
       method: () => {
         setEditOpen(true);
@@ -98,8 +89,8 @@ export default function ActionsMenu({
     },
     {
       name: OptionName.DELETE,
-      iconColor: "error",
-      textColor: "error",
+      iconColor: 'error',
+      textColor: 'error',
       icon: DeleteIcon,
       method: (e) => {
         deleteTodo(e);
@@ -112,9 +103,9 @@ export default function ActionsMenu({
   };
 
   const handleEvent = (option: OptionName, e: any) => {
-    if (option === "Star") markStar(todo.id);
-    else if (option === "Edit") setEditOpen(true);
-    else if (option === "Delete") deleteTodo(e);
+    if (option === 'Star') markStar(todo.id);
+    else if (option === 'Edit') setEditOpen(true);
+    else if (option === 'Delete') deleteTodo(e);
     setAnchorEl(null);
   };
 
@@ -138,21 +129,15 @@ export default function ActionsMenu({
         PaperProps={{
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
-            width: "20ch",
+            width: '20ch',
           },
         }}
       >
         {options.map((option) => (
           <MenuItem key={option.name} onClick={option.method}>
-            <option.icon
-              color={option.iconColor}
-              htmlColor={option.customColor}
-            />
+            <option.icon color={option.iconColor} htmlColor={option.customColor} />
             &nbsp;
-            <Typography
-              color={option.textColor}
-              style={{ color: option.customColor }}
-            >
+            <Typography color={option.textColor} style={{ color: option.customColor }}>
               {option.name}
             </Typography>
           </MenuItem>

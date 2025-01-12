@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "postbuild": "node dist/scripts/post-build.js",
     "prod": "node dist/index.js",
-    "start": "npx nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts"
+    "start": "npx nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts --project=pg-todo-ai"
   },
   "keywords": [],
   "author": "",

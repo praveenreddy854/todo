@@ -11,6 +11,13 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/pg-todo-ai/src/index.ts",
       "outFiles": ["${workspaceFolder}/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Process (pg-todo-ai)",
+      "processId": "${command:PickProcess}",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

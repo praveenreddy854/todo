@@ -1,42 +1,43 @@
-import React from "react";
-import { useState, FC, ChangeEvent } from "react";
-import {
-  FormControl,
-  Container,
-  Button,
-  TextField,
-  Snackbar,
-} from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import { Add } from "@material-ui/icons";
-import { AddToDoArgs } from "../../types/types";
+import React from 'react';
+import { useState, FC, ChangeEvent } from 'react';
+import { FormControl, Container, Button, TextField, Snackbar } from '@material-ui/core';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { Alert } from '@material-ui/lab';
+import { Add } from '@material-ui/icons';
+import { AddToDoArgs } from '../../types/types';
+import { useAddTodoStyles } from './AddTodo.styles';
+import { Dayjs } from 'dayjs';
 
 const AddTodo: FC<{ addTodo: (args: AddToDoArgs) => void }> = ({ addTodo }) => {
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
+  const [dueDate, setDueDate] = useState<Dayjs | null>(null);
   const [open, setOpen] = useState(false);
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setText(e.target.value);
+  const classes = useAddTodoStyles();
+  const handleTitleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setText(e.target.value);
+  const handleDateChangeAccepted = (date: Dayjs | null) => setDueDate(date);
   const createTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    addTodo({ title: text });
-    setText("");
+    addTodo({ title: text, dueAt: dueDate?.toDate() });
+    setText('');
     if (text.trim()) setOpen(true);
   };
 
   return (
     <div>
       <Container maxWidth="sm">
-        <form onSubmit={createTodo} className="add-todo">
+        <form onSubmit={createTodo}>
           <FormControl fullWidth={true}>
             <TextField
+              className={classes.addTodoControls}
               label="I will do this"
               variant="standard"
-              onChange={handleChange}
+              onChange={handleTitleChange}
               required={true}
               value={text}
             />
+            <DateTimePicker className={classes.addTodoControls} onAccept={(value) => handleDateChangeAccepted(value)} />
             <Button
+              className={classes.addTodoControls}
               variant="contained"
               color="primary"
               style={{ marginTop: 5 }}
@@ -52,7 +53,7 @@ const AddTodo: FC<{ addTodo: (args: AddToDoArgs) => void }> = ({ addTodo }) => {
         open={open}
         autoHideDuration={4000}
         onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert
           // icon={<Check fontSize="inherit" />}

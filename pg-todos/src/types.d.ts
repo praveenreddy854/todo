@@ -4,4 +4,7 @@ export interface TodoType {
   completed?: boolean;
   starred?: boolean;
   hidden?: boolean;
+  dueAt?: Date;
+  createdAt: Date;
+  modifiedAt: Date;
 }

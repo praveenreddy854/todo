@@ -1,44 +1,51 @@
-import { ArgumentSchema } from "./types";
+import { ArgumentSchema } from './types';
 
 export const titleProp: ArgumentSchema = {
-  type: "string",
-  description: "The title of the todo",
-  name: "title",
+  type: 'string',
+  description: 'The title of the todo',
+  name: 'title',
   required: true,
 };
 
+export const dueDateProp: ArgumentSchema = {
+  type: 'string',
+  description: 'The due date of the todo',
+  name: 'dueAt',
+  required: false,
+};
+
 export const idProp: ArgumentSchema = {
-  type: "number",
-  description: "The id of the todo",
-  name: "id",
+  type: 'number',
+  description: 'The id of the todo',
+  name: 'id',
   required: true,
 };
 
 export const idsProp: ArgumentSchema = {
-  type: "array",
-  items: { type: "number" },
-  description: "The ids of the todos",
-  name: "ids",
+  type: 'array',
+  items: { type: 'number' },
+  description: 'The ids of the todos',
+  name: 'ids',
   required: true,
 };
 
 export const starProps: ArgumentSchema = {
-  type: "boolean",
-  description: "Whether the todo is starred",
-  name: "starred",
+  type: 'boolean',
+  description: 'Whether the todo is starred',
+  name: 'starred',
   required: false,
 };
 
 export const hiddenProp: ArgumentSchema = {
-  type: "boolean",
-  description: "Whether the todo is hidden",
-  name: "hidden",
+  type: 'boolean',
+  description: 'Whether the todo is hidden',
+  name: 'hidden',
   required: false,
 };
 
 export const completedProp: ArgumentSchema = {
-  type: "boolean",
-  description: "Whether the todo is completed",
-  name: "completed",
+  type: 'boolean',
+  description: 'Whether the todo is completed',
+  name: 'completed',
   required: false,
 };

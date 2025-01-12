@@ -1,12 +1,12 @@
-import { todoServiceFnUrl } from "../urlHelper";
-import axios from "axios";
-import { useMutation } from "react-query";
-import { ChatChoice } from "@azure/openai";
+import { todoServiceFnUrl } from '../urlHelper';
+import axios from 'axios';
+import { useMutation } from 'react-query';
+import { ChatChoice } from '@azure/openai';
 
 export const useCallLlmFn = () => {
   return useMutation<ChatChoice, Error, string>({
     mutationFn: async (query: string) => {
-      const data = { message: query };
+      const data = { message: query, requestTime: new Date().toLocaleDateString() };
       const response = await axios.post(todoServiceFnUrl, data);
       return response.data.completions.choices[0];
     },

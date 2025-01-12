@@ -1,34 +1,34 @@
-import { ChatChoice } from "@azure/openai";
-import { DeleteToDosArgs, Functions } from "../types/types";
-import { useAddInterPreter } from "./useAddInterPreter";
-import { useDeletesInterPreter } from "./useDeleteInterPreter";
-import { useUpdatesInterPreter } from "./useUpdateInterPreter";
-import { Project } from "ts-morph";
-import { createFunctions } from "../functions/createFunctions";
+import { ChatChoice } from '@azure/openai';
+import { DeleteToDosArgs, Functions } from '../types/types';
+import { useAddInterPreter } from './useAddInterPreter';
+import { useDeletesInterPreter } from './useDeleteInterPreter';
+import { useUpdatesInterPreter } from './useUpdateInterPreter';
+import { Project } from 'ts-morph';
+import { tryParseDate } from '../functions/dateTimeUtils';
+import { cleanArguments } from '../functions/commonUtils';
+import { useListInterPreter } from './useListInterPreter';
 
 export const useInterPreter = () => {
   // Execute create ToDo interpreter only if the LLM response returned create_todo fn
   const addTodo = useAddInterPreter();
   const deleteTodos = useDeletesInterPreter();
   const updateTodos = useUpdatesInterPreter();
+  const listTodos = useListInterPreter();
   return function (response?: ChatChoice) {
-    if (response?.finishReason !== "stop") {
-      throw Error("Function call is not a stop.");
+    if (response?.finishReason !== 'stop') {
+      throw Error('Function call is not a stop.');
     }
 
     let resultMap: Record<string, unknown> = {};
     extractFnsAndVariables(response).forEach((fn) => {
       switch (fn?.name) {
         case Functions.createTodos:
-          Object.keys(fn.arguments).forEach((key) => {
-            if (key === "title") {
-              const id = addTodo({ title: fn.arguments[key] as string });
-              if (fn.result) {
-                resultMap[fn.result as string] = id;
-              }
-              return;
-            }
-          });
+          const title = fn.arguments['title'] as string;
+          const dueAt = tryParseDate(fn.arguments['dueAt'] as string);
+          const id = addTodo({ title, dueAt });
+          if (fn.result) {
+            resultMap[fn.result as string] = id;
+          }
           break;
         case Functions.deleteTodos:
           const deleteTodoArgs: DeleteToDosArgs = {
@@ -42,7 +42,7 @@ export const useInterPreter = () => {
 
           const updatesTodoArgsWithId = ids.map((id) => {
             if (isNaN(id)) {
-              throw new Error("Id is not a number");
+              throw new Error('Id is not a number');
             }
             const { ids, ...rest } = updateTodoArgs; // remove ids property
             return { ...rest, id: id }; // add id property
@@ -50,8 +50,15 @@ export const useInterPreter = () => {
 
           updateTodos(updatesTodoArgsWithId);
           break;
+        case Functions.listTodos:
+          const listTodoIds = listTodos(extractIdsFromArgs(fn, resultMap));
+          if (fn.result) {
+            resultMap[fn.result as string] = listTodoIds;
+          }
+          console.log('listTodoIds', listTodoIds);
+          break;
         default:
-          throw Error("Function not found");
+          throw Error('Function not found');
       }
     });
   };
@@ -66,99 +73,65 @@ export interface FunctionArgsResultMap {
 const extractFnsAndVariables = (response: ChatChoice) => {
   const fnArgsResults: FunctionArgsResultMap[] = [];
   const project = new Project({ useInMemoryFileSystem: true });
-  const responseSplits = response?.message?.content?.split(";");
+  const responseSplits = response?.message?.content?.split(';');
 
   responseSplits?.forEach((line) => {
     const sourceFileName = `${Math.random().toString(36).substring(7)}.ts`;
     const sourceFile = project.createSourceFile(sourceFileName, line);
     try {
-      let fnName: string = "";
+      let fnName: string = '';
       let fnArgs: Record<string, unknown> = {};
       let result: unknown;
 
       sourceFile.getDescendants().forEach((node) => {
-        if (node.getKindName() === "ExpressionStatement") {
+        if (node.getKindName() === 'ExpressionStatement') {
           node.getDescendants().forEach((expressionChild) => {
-            if (expressionChild.getKindName() === "CallExpression") {
-              expressionChild
-                .getDescendants()
-                .forEach((callExpressionChild) => {
-                  if (
-                    callExpressionChild.getKindName() === "Identifier" &&
-                    !fnName
-                  ) {
-                    fnName = callExpressionChild.getText();
-                  } else if (
-                    callExpressionChild.getKindName() === "BinaryExpression"
-                  ) {
-                    const splits = callExpressionChild.getText().split("=");
-                    fnArgs[splits[0]] = splits[1];
-                  }
-                });
+            if (expressionChild.getKindName() === 'CallExpression') {
+              expressionChild.getDescendants().forEach((callExpressionChild) => {
+                if (callExpressionChild.getKindName() === 'Identifier' && !fnName) {
+                  fnName = callExpressionChild.getText();
+                } else if (callExpressionChild.getKindName() === 'BinaryExpression') {
+                  const splits = callExpressionChild.getText().split('=');
+                  fnArgs[splits[0]] = splits[1];
+                }
+              });
             }
           });
-        } else if (node.getKindName() === "VariableStatement") {
+        } else if (node.getKindName() === 'VariableStatement') {
           node.getDescendants().forEach((variableStatementChild) => {
-            if (
-              variableStatementChild.getKindName() === "VariableDeclarationList"
-            ) {
-              variableStatementChild
-                .getDescendants()
-                .forEach((variableDeclarationListChild) => {
-                  if (
-                    variableDeclarationListChild.getKindName() ===
-                    "VariableDeclaration"
-                  ) {
-                    variableDeclarationListChild
-                      .getDescendants()
-                      .forEach((variableDeclarationChild) => {
-                        if (
-                          variableDeclarationChild.getKindName() ===
-                            "Identifier" &&
-                          !result
-                        ) {
-                          result = variableDeclarationChild.getText();
-                        } else if (
-                          variableDeclarationChild.getKindName() ===
-                          "CallExpression"
-                        ) {
-                          variableDeclarationChild
-                            .getDescendants()
-                            .forEach((callExpressionChild) => {
-                              if (
-                                callExpressionChild.getKindName() ===
-                                  "Identifier" &&
-                                !fnName
-                              ) {
-                                fnName = callExpressionChild.getText();
-                              } else if (
-                                callExpressionChild.getKindName() ===
-                                "BinaryExpression"
-                              ) {
-                                const splits = callExpressionChild
-                                  .getText()
-                                  .split("=");
-                                fnArgs[splits[0]] = splits[1];
-                              }
-                            });
+            if (variableStatementChild.getKindName() === 'VariableDeclarationList') {
+              variableStatementChild.getDescendants().forEach((variableDeclarationListChild) => {
+                if (variableDeclarationListChild.getKindName() === 'VariableDeclaration') {
+                  variableDeclarationListChild.getDescendants().forEach((variableDeclarationChild) => {
+                    if (variableDeclarationChild.getKindName() === 'Identifier' && !result) {
+                      result = variableDeclarationChild.getText();
+                    } else if (variableDeclarationChild.getKindName() === 'CallExpression') {
+                      variableDeclarationChild.getDescendants().forEach((callExpressionChild) => {
+                        if (callExpressionChild.getKindName() === 'Identifier' && !fnName) {
+                          fnName = callExpressionChild.getText();
+                        } else if (callExpressionChild.getKindName() === 'BinaryExpression') {
+                          const splits = callExpressionChild.getText().split('=');
+                          fnArgs[splits[0]] = splits[1];
                         }
                       });
-                  }
-                });
+                    }
+                  });
+                }
+              });
             }
           });
         }
       });
 
       if (!fnName) {
-        throw Error("Function name is not found in the response");
+        throw Error('Function name is not found in the response');
       }
       if (Object.keys(fnArgs).length === 0) {
-        throw Error("Function arguments are not found in the response");
+        throw Error('Function arguments are not found in the response');
       }
       fnArgsResults.push({
         name: fnName as Functions,
-        arguments: fnArgs,
+        arguments: cleanArguments(fnArgs),
         result: result,
       });
     } finally {
@@ -166,26 +139,21 @@ const extractFnsAndVariables = (response: ChatChoice) => {
       project.removeSourceFile(sourceFile);
     }
   });
-  console.log("fnArgsResults", fnArgsResults);
+  console.log('fnArgsResults', fnArgsResults);
   return fnArgsResults;
 };
-function extractIdsFromArgs(
-  fn: FunctionArgsResultMap,
-  resultMap: Record<string, unknown>
-) {
+function extractIdsFromArgs(fn: FunctionArgsResultMap, resultMap: Record<string, unknown>) {
   const ids: number[] = [];
   Object.keys(fn.arguments).forEach((key) => {
-    if (key === "ids") {
+    if (key === 'ids') {
       const idsStr = (fn.arguments[key] as string)
-        .replace("<<", "")
-        .replace(">>", "")
-        .replace("[", "")
-        .replace("]", "");
+        .replace('<<', '')
+        .replace('>>', '')
+        .replace('[', '')
+        .replace(']', '');
 
-      idsStr.split(",").forEach((id) => {
-        ids.push(
-          parseInt(resultMap[id.trim()] as string) || parseInt(id.trim())
-        );
+      idsStr.split(',').forEach((id) => {
+        ids.push(parseInt(resultMap[id.trim()] as string) || parseInt(id.trim()));
       });
       return;
     }

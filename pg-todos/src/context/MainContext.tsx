@@ -1,7 +1,7 @@
-import React from "react";
-import { TodoType } from "../types";
-import { createContext, useState, useEffect, ReactNode } from "react";
-import { AddToDoArgs, UpdateToDoArgs } from "../types/types";
+import React from 'react';
+import { TodoType } from '../types';
+import { createContext, useState, ReactNode } from 'react';
+import { AddToDoArgs, UpdateToDoArgs } from '../types/types';
 
 interface MainContextInterface {
   todos: TodoType[];
@@ -14,6 +14,7 @@ interface MainContextInterface {
   moveTodo: (old: number, new_: number) => void;
   markStar: (id: number) => void;
   hideTodo: (id: number) => void;
+  listTodos: (ids: number[]) => TodoType[];
 }
 
 interface Props {
@@ -23,9 +24,7 @@ interface Props {
 export const MainContext = createContext<MainContextInterface | null>(null);
 
 export const MainProvider = ({ children }: Props) => {
-  let todosFromLocalStore = JSON.parse(
-    localStorage.getItem("todos") || "[]"
-  ) as TodoType[];
+  let todosFromLocalStore = JSON.parse(localStorage.getItem('todos') || '[]') as TodoType[];
 
   const [todos, setTodos] = useState(todosFromLocalStore);
 
@@ -35,6 +34,9 @@ export const MainProvider = ({ children }: Props) => {
       const newTodo = {
         id: Math.floor(Math.random() * 50000),
         title,
+        dueAt: args.dueAt,
+        createdAt: new Date(),
+        modifiedAt: new Date(),
       };
       const orderTodos = [newTodo, ...todosFromLocalStore];
       updateLocalStorage(orderTodos);
@@ -43,23 +45,22 @@ export const MainProvider = ({ children }: Props) => {
     return 0;
   };
 
-  const updateTodos: (args: UpdateToDoArgs[]) => void = (
-    args: UpdateToDoArgs[]
-  ) => {
+  const listTodos = (ids: number[]) => {
+    return todosFromLocalStore.filter((todo) => ids.includes(todo.id));
+  };
+
+  const updateTodos: (args: UpdateToDoArgs[]) => void = (args: UpdateToDoArgs[]) => {
     if (args.length > 0) {
       updateLocalStorage(
         todosFromLocalStore.map((todo) => {
           const update = args.find((x) => x.id === todo.id);
           if (update) {
             todo.title = update.title ? update.title : todo.title;
-            todo.completed =
-              update.completed !== undefined
-                ? update.completed
-                : todo.completed;
-            todo.starred =
-              update.starred !== undefined ? update.starred : todo.starred;
-            todo.hidden =
-              update.hidden !== undefined ? update.hidden : todo.hidden;
+            todo.completed = update.completed !== undefined ? update.completed : todo.completed;
+            todo.starred = update.starred !== undefined ? update.starred : todo.starred;
+            todo.hidden = update.hidden !== undefined ? update.hidden : todo.hidden;
+            todo.dueAt = update.dueAt !== undefined ? update.dueAt : todo.dueAt;
+            todo.modifiedAt = new Date();
           }
           return todo;
         })
@@ -68,13 +69,16 @@ export const MainProvider = ({ children }: Props) => {
   };
 
   const updateLocalStorage = (t: TodoType[]) => {
-    localStorage.setItem("todos", JSON.stringify(t));
+    localStorage.setItem('todos', JSON.stringify(t));
     todosFromLocalStore = t;
     setTodos(t);
   };
   const markComplete = (id: number) => {
     const orderTodos = todosFromLocalStore.map((todo) => {
-      if (todo.id === id) todo.completed = !todo.completed;
+      if (todo.id === id) {
+        todo.completed = !todo.completed;
+        todo.modifiedAt = new Date();
+      }
       return todo;
     });
     orderStarAndComplete(orderTodos);
@@ -83,7 +87,10 @@ export const MainProvider = ({ children }: Props) => {
 
   const markStar = (id: number) => {
     const orderTodos = todosFromLocalStore.map((todo) => {
-      if (todo.id === id) todo.starred = !todo.starred;
+      if (todo.id === id) {
+        todo.starred = !todo.starred;
+        todo.modifiedAt = new Date();
+      }
       return todo;
     });
     orderStarAndComplete(orderTodos);
@@ -92,7 +99,10 @@ export const MainProvider = ({ children }: Props) => {
 
   const hideTodo = (id: number) => {
     const orderTodos = todosFromLocalStore.map((todo) => {
-      if (todo.id === id) todo.hidden = !todo.hidden;
+      if (todo.id === id) {
+        todo.hidden = !todo.hidden;
+        todo.modifiedAt = new Date();
+      }
       return todo;
     });
     updateLocalStorage(orderTodos);
@@ -104,9 +114,7 @@ export const MainProvider = ({ children }: Props) => {
   };
 
   const deleteTodos = (ids: number[]) => {
-    const filteredTodos = todosFromLocalStore.filter(
-      (todo) => !ids.includes(todo.id)
-    );
+    const filteredTodos = todosFromLocalStore.filter((todo) => !ids.includes(todo.id));
     updateLocalStorage(filteredTodos);
   };
 
@@ -114,6 +122,7 @@ export const MainProvider = ({ children }: Props) => {
   const moveTodo = (old: number, new_: number) => {
     const copy = JSON.parse(JSON.stringify(todosFromLocalStore));
     const thing = JSON.parse(JSON.stringify(todosFromLocalStore[old]));
+    thing.modifiedAt = new Date();
     copy.splice(old, 1);
     copy.splice(new_, 0, thing);
     updateLocalStorage(copy);
@@ -130,11 +139,8 @@ export const MainProvider = ({ children }: Props) => {
     moveTodo,
     markStar,
     hideTodo,
+    listTodos,
   };
 
-  return (
-    <MainContext.Provider value={mainContextValue}>
-      {children}
-    </MainContext.Provider>
-  );
+  return <MainContext.Provider value={mainContextValue}>{children}</MainContext.Provider>;
 };

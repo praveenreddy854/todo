@@ -4,4 +4,4 @@
 - Never nest functions/statements. Every statement/function call must be in a separate line.
 - Don't respond with a question or ask for confirmation. Respond with appropriate function calling response instead.
 - Don't include prompt in the response message.
-
+- When generating dates make sure to replace the hard coded dates with the appropriate date from given context from the function calling responses.

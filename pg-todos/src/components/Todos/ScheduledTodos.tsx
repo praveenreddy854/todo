@@ -52,7 +52,7 @@ export default function ScheduledTodos(props: ScheduledTodoProps) {
             <EmptyRows />
           ) : (
             rows.map((row) => {
-              return <Row row={row} onDelete={onDelete} onEdit={onEdit} />;
+              return <Row row={row} onDelete={onDelete} onEdit={onEdit} key={`scheduled-todo-${row.id}`} />;
             })
           )}
         </TableBody>
@@ -92,7 +92,7 @@ function Row(props: { row: TodoType; onDelete: () => void; onEdit: () => void })
 
   return (
     <React.Fragment>
-      <TableRow>
+      <TableRow key="scheduled-todo-overview">
         <TableCell>
           <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -118,7 +118,7 @@ function Row(props: { row: TodoType; onDelete: () => void; onEdit: () => void })
           />
         </TableCell>
       </TableRow>
-      <TableRow style={{ border: 'none', background: '#F8F8F8' }}>
+      <TableRow style={{ border: 'none', background: '#F8F8F8' }} key="scheduled-todo-more">
         <TableCell style={{ paddingBottom: 0, paddingTop: 0, border: 'none' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Typography variant="h6">More details</Typography>

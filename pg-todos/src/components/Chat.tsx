@@ -132,10 +132,11 @@ export function Chat() {
       <Paper className={classes.paper}>
         <Paper className={classes.messagesBody}>
           {chatMessages?.map((message) => {
+            const key = `message_${message.timestamp.getTime()}`;
             if (message.userMessage) {
-              return <MessageLeft {...message} />;
+              return <MessageLeft {...message} key={key} />;
             }
-            return <MessageRight {...message} />;
+            return <MessageRight {...message} key={key} />;
           })}
         </Paper>
 

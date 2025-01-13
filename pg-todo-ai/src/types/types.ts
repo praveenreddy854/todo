@@ -1,4 +1,4 @@
-import { ChatCompletions, ChatMessage } from "@azure/openai";
+import { ChatCompletions, ChatMessage } from '@azure/openai';
 
 export interface LlmInput {
   functions: FunctionSchema[];
@@ -10,24 +10,24 @@ export interface ChatCompletionsWithPrompt {
 }
 
 export enum Functions {
-  createTodo = "create",
-  deleteTodo = "deletes", // delete is a reserved keyword
-  listTodos = "list",
-  updateTodo = "update",
+  createTodo = 'create',
+  deleteTodo = 'deletes', // delete is a reserved keyword
+  listTodos = 'list',
+  updateTodo = 'update',
 }
 
 export enum Actions {
-  create = "create",
-  delete = "delete",
-  update = "update",
-  list = "list",
-  createUpdate = "create-update",
+  create = 'create',
+  delete = 'delete',
+  update = 'update',
+  list = 'list',
+  createUpdate = 'create-update',
 }
 
 export const Roles = {
-  User: "user",
-  System: "system",
-  Assistant: "assistant",
+  User: 'user',
+  System: 'system',
+  Assistant: 'assistant',
 };
 
 export interface FunctionSchema {
@@ -46,5 +46,6 @@ export interface ArgumentSchema {
 
 export interface SamplePrompt {
   prompt: string;
+  reasoning: string;
   response: string;
 }

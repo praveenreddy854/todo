@@ -82,7 +82,9 @@ const generatePromptInternal = (
 
   llmRawInputMerged.messages.push({
     role: Roles.System,
-    content: `User might include relate dates like tomorrow or next week or next Sunday. Use the current date time which is ${requestTime} to compute the exact date time.`,
+    content: `User might include relative dates like tomorrow or next week or next Sunday.
+              Based on the current date time ${requestTime} compute the exact date time.
+              The provided date time should always be in future.`,
   });
 
   llmRawInputMerged.messages.push({

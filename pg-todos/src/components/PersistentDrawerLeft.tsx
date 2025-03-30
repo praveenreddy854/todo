@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AppBar,
   CssBaseline,
@@ -17,7 +17,7 @@ import {
   Button,
   useScrollTrigger,
   useMediaQuery,
-} from "@material-ui/core";
+} from '@material-ui/core';
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -30,21 +30,21 @@ import {
   Settings as SettingsIcon,
   ChatOutlined as ChatIconOutlined,
   Chat as ChatIcon,
-} from "@material-ui/icons";
-import { Link, useLocation } from "wouter";
-import clsx from "clsx";
-import { useState } from "react";
-import CustomLink from "./CustomLink";
-import MoreMenu from "./Actions/MoreMenu";
+} from '@material-ui/icons';
+import { Link, useLocation } from 'wouter';
+import clsx from 'clsx';
+import { useState } from 'react';
+import CustomLink from './CustomLink';
+import MoreMenu from './Actions/MoreMenu';
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: "flex",
+    display: 'flex',
   },
   appBar: {
-    transition: theme.transitions.create(["margin", "width"], {
+    transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
     marginLeft: drawerWidth,
-    transition: theme.transitions.create(["margin", "width"], {
+    transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(2),
   },
   hide: {
-    display: "none",
+    display: 'none',
   },
   drawer: {
     width: drawerWidth,
@@ -71,24 +71,24 @@ const useStyles = makeStyles((theme) => ({
     width: drawerWidth,
   },
   drawerHeader: {
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
     padding: theme.spacing(0, 1),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
   content: {
     flexGrow: 1,
     padding: theme.spacing(1),
-    transition: theme.transitions.create("margin", {
+    transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: -drawerWidth,
   },
   contentShift: {
-    transition: theme.transitions.create("margin", {
+    transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
@@ -121,7 +121,7 @@ export default function PersistentDrawerLeft(props: any) {
   const [open, setOpen] = useState(false);
   const { isChatOpen, setIsChatOpen } = props;
   const [location] = useLocation();
-  const matches = useMediaQuery("(max-width: 768px)");
+  const matches = useMediaQuery('(max-width: 768px)');
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -154,7 +154,7 @@ export default function PersistentDrawerLeft(props: any) {
         >
           <Toolbar style={{ paddingRight: matches ? 8 : 10 }}>
             {matches ? (
-              location === "/" ? (
+              location === '/' ? (
                 <IconButton
                   color="inherit"
                   aria-label="open drawer"
@@ -179,27 +179,17 @@ export default function PersistentDrawerLeft(props: any) {
                 </Link>
               )
             ) : (
-              ""
+              ''
             )}
             {!open && (
               <>
                 {matches ? (
-                  <Typography
-                    variant="h6"
-                    noWrap
-                    style={{ flexGrow: 1, cursor: "pointer" }}
-                  >
-                    {location === "/"
-                      ? "PG TODOS"
-                      : location.toUpperCase().replace("/", "")}
+                  <Typography variant="h6" noWrap style={{ flexGrow: 1, cursor: 'pointer' }}>
+                    {location === '/' ? 'PG TODOS' : location.toUpperCase().replace('/', '')}
                   </Typography>
                 ) : (
                   <Link href="/">
-                    <Typography
-                      variant="h6"
-                      noWrap
-                      style={{ flexGrow: 1, cursor: "pointer" }}
-                    >
+                    <Typography variant="h6" noWrap style={{ flexGrow: 1, cursor: 'pointer' }}>
                       PG TODOs
                     </Typography>
                   </Link>
@@ -207,45 +197,43 @@ export default function PersistentDrawerLeft(props: any) {
 
                 {!matches && (
                   <>
-                    {["Settings", "About"].map((name, i) => (
+                    {['Settings', 'About'].map((name, i) => (
                       <CustomLink href={`/${name.toLowerCase()}`} key={name}>
                         <Button
                           startIcon={
-                            name === "Settings" ? (
-                              location === "/settings" ? (
+                            name === 'Settings' ? (
+                              location === '/settings' ? (
                                 <SettingsIcon />
                               ) : (
                                 <SettingsIconOutlined />
                               )
-                            ) : name === "About" ? (
-                              location === "/about" ? (
+                            ) : name === 'About' ? (
+                              location === '/about' ? (
                                 <AboutIcon />
                               ) : (
                                 <AboutIconOutlined />
                               )
                             ) : null
                           }
-                          style={{ color: "white", margin: 5 }}
+                          style={{ color: 'white', margin: 5 }}
                         >
                           {name}
                         </Button>
                       </CustomLink>
                     ))}
 
-                    {location === "/" ? (
+                    {location === '/' ? (
                       <Button
-                        startIcon={
-                          isChatOpen ? <ChatIcon /> : <ChatIconOutlined />
-                        }
-                        style={{ color: "white", margin: 5 }}
+                        startIcon={isChatOpen ? <ChatIcon /> : <ChatIconOutlined />}
+                        style={{ color: 'white', margin: 5 }}
                         onClick={handleChatClick}
                       ></Button>
                     ) : (
-                      ""
+                      ''
                     )}
                   </>
                 )}
-                {location === "/" && <MoreMenu />}
+                {location === '/' && <MoreMenu />}
               </>
             )}
           </Toolbar>
@@ -262,26 +250,20 @@ export default function PersistentDrawerLeft(props: any) {
       >
         <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose} centerRipple={false}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </div>
         <Divider />
         <List>
-          {["Todos", "Settings", "About"].map((text, index) => (
-            <CustomLink
-              key={text}
-              onClick={handleDrawerClose}
-              href={index === 0 ? "/" : `/${text.toLowerCase()}`}
-            >
-              <ListItem button>
+          {['Todos', 'Chat', 'Settings', 'About'].map((text, index) => (
+            <CustomLink key={text} onClick={handleDrawerClose} href={index < 2 ? '/' : `/${text.toLowerCase()}`}>
+              <ListItem button onClick={() => (text === 'Chat' ? handleChatClick() : null)}>
                 <ListItemIcon>
                   {index === 0 ? (
                     <TodoIcon />
                   ) : index === 1 ? (
+                    <ChatIconOutlined />
+                  ) : index === 2 ? (
                     <SettingsIconOutlined />
                   ) : (
                     <AboutIconOutlined />

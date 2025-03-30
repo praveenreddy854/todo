@@ -15,15 +15,15 @@
     "@mui/x-data-grid": "^7.10.0",
     "@mui/x-date-pickers": "^7.11.0",
     "@types/node": "^14.14.16",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
+    "@types/react": "18",
+    "@types/react-dom": "18",
     "axios": "^1.7.9",
     "darkreader": "^4.9.26",
     "dayjs": "^1.11.12",
     "get-user-locale": "^2.3.2",
-    "react": "^17.0.1",
+    "react": "18",
     "react-beautiful-dnd": "^13.0.0",
-    "react-dom": "^17.0.1",
+    "react-dom": "18",
     "react-flip-move": "^3.0.4",
     "react-query": "^3.39.3",
     "react-scripts": "^5.0.1",
@@ -36,7 +36,9 @@
   "scripts": {
     "start": "nodemon --exec react-scripts start",
     "build": "react-scripts build",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!(@mui|dayjs)/)\"",
+    "test:coverage": "react-scripts test --coverage --transformIgnorePatterns \"node_modules/(?!(@mui|dayjs)/)\""
   },
   "eslintConfig": {
     "extends": "react-app"

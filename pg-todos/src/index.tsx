@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { MainProvider } from './context/MainContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { DeleteConfirmProvider } from './context/DeleteConfirmContext';
@@ -8,17 +8,21 @@ import App from './App';
 import './styles.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
-render(
-  <MainProvider>
-    <ThemeProvider>
-      <DeleteConfirmProvider>
-        <SmallTextProvider>
-          <App />
-        </SmallTextProvider>
-      </DeleteConfirmProvider>
-    </ThemeProvider>
-  </MainProvider>,
-  document.getElementById('root')
+const container = document.getElementById('root');
+const root = createRoot(container!);
+
+root.render(
+  <React.StrictMode>
+    <MainProvider>
+      <ThemeProvider>
+        <DeleteConfirmProvider>
+          <SmallTextProvider>
+            <App />
+          </SmallTextProvider>
+        </DeleteConfirmProvider>
+      </ThemeProvider>
+    </MainProvider>
+  </React.StrictMode>
 );
 
 // If you want your app to work offline and load faster, you can change

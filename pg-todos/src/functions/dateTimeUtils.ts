@@ -89,7 +89,12 @@ export const getRelativeTimeString = (
 
 export const tryParseDate = (date: string): Date | undefined => {
   try {
-    return new Date(date);
+    if (!date || date.trim() === '') {
+      return undefined;
+    }
+    const parsedDate = new Date(date);
+    // Check if the date is valid
+    return isNaN(parsedDate.getTime()) ? undefined : parsedDate;
   } catch (error) {
     return undefined;
   }

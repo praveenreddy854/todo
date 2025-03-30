@@ -35,7 +35,13 @@ const AddTodo: FC<{ addTodo: (args: AddToDoArgs) => void }> = ({ addTodo }) => {
               required={true}
               value={text}
             />
-            <DateTimePicker className={classes.addTodoControls} onAccept={(value) => handleDateChangeAccepted(value)} />
+            <DateTimePicker
+              className={classes.addTodoControls}
+              value={dueDate}
+              onChange={(newValue) => setDueDate(newValue)}
+              onAccept={(value) => handleDateChangeAccepted(value)}
+              label="Due date (optional)"
+            />
             <Button
               className={classes.addTodoControls}
               variant="contained"

@@ -24,7 +24,8 @@ export const useInterPreter = () => {
       switch (fn?.name) {
         case Functions.createTodos:
           const title = fn.arguments['title'] as string;
-          const dueAt = tryParseDate(fn.arguments['dueAt'] as string);
+          const dueAtStr = fn.arguments['dueAt'] as string | undefined;
+          const dueAt = dueAtStr ? tryParseDate(dueAtStr) : undefined;
           const id = addTodo({ title, dueAt });
           if (fn.result) {
             resultMap[fn.result as string] = id;

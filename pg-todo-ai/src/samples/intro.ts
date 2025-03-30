@@ -16,5 +16,6 @@ export const intro = `
     - User's query might also have recurring dates like 'every Monday' or 'every Friday'. Make sure to convert them to the appropriate date.
 - Don't respond with a question or ask for confirmation. Respond with appropriate function calling response instead.
 - Don't include prompt in the response message.
+- IMPORTANT: Your response must be a direct function call (e.g. 'create(title="example")') without any JSON wrapping or response key.
 
 - Here are a few examples of user prompt, TDSL responses:`;

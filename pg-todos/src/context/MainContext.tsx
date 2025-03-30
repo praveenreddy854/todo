@@ -38,7 +38,7 @@ export const MainProvider = ({ children }: Props) => {
         createdAt: new Date(),
         modifiedAt: new Date(),
       };
-      const orderTodos = [newTodo, ...todosFromLocalStore];
+      const orderTodos = [newTodo, ...todos];
       updateLocalStorage(orderTodos);
       return newTodo.id;
     }

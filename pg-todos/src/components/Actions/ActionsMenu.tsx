@@ -117,8 +117,14 @@ export default function ActionsMenu({ deleteTodo, setEditOpen, markStar, hideTod
         aria-haspopup="true"
         onClick={handleClick}
         centerRipple={false}
+        style={{
+          padding: '8px',
+          borderRadius: '8px',
+          transition: 'all 0.2s ease',
+          backgroundColor: 'rgba(0, 0, 0, 0.03)',
+        }}
       >
-        <MenuIcon />
+        <MenuIcon style={{ fontSize: '20px', color: todo.starred ? '#eab308' : '#3b82f6' }} />
       </IconButton>
       <Menu
         id="long-menu"
@@ -130,14 +136,44 @@ export default function ActionsMenu({ deleteTodo, setEditOpen, markStar, hideTod
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
             width: '20ch',
+            borderRadius: '12px',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
+            overflow: 'hidden',
+          },
+        }}
+        MenuListProps={{
+          style: {
+            padding: '8px',
           },
         }}
       >
         {options.map((option) => (
-          <MenuItem key={option.name} onClick={option.method}>
-            <option.icon color={option.iconColor} htmlColor={option.customColor} />
-            &nbsp;
-            <Typography color={option.textColor} style={{ color: option.customColor }}>
+          <MenuItem
+            key={option.name}
+            onClick={option.method}
+            style={{
+              borderRadius: '8px',
+              margin: '2px 0',
+              padding: '8px 12px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <option.icon
+              color={option.iconColor}
+              htmlColor={option.customColor}
+              style={{
+                marginRight: '12px',
+                fontSize: '20px',
+              }}
+            />
+            <Typography
+              color={option.textColor}
+              style={{
+                color: option.customColor,
+                fontWeight: 500,
+                fontSize: '15px',
+              }}
+            >
               {option.name}
             </Typography>
           </MenuItem>
